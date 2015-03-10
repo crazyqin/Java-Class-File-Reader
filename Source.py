@@ -5,6 +5,48 @@ import sys
 import struct
 import binascii
 
+class CONSTANT_Utf8_info():
+        pass
+
+class CONSTANT_Integer_info():
+        pass
+
+class CONSTANT_Float_info():
+        pass
+
+class CONSTANT_Double_info():
+        pass
+
+class CONSTANT_Long_info():
+        pass
+
+class CONSTANT_Class_info():
+        pass
+
+class CONSTANT_String_info():
+        pass
+
+class CONSTANT_Fieldref_info():
+        pass
+
+class CONSTANT_Methodref_info():
+        pass
+
+class CONSTANT_InterfaceMethodref_info():
+        pass
+
+class CONSTANT_NameAndType_info():
+        pass
+
+class CONSTANT_MethodHandle_info():
+        pass
+
+class CONSTANT_MethodType_info():
+        pass
+
+class CONSTANT_InvokeDynamic_info():
+        pass
+
 def checkMagicNumber(f,begin):
         flag=False
         magic_number, = struct.unpack("!L",c[begin:begin+4])
@@ -46,4 +88,10 @@ if __name__=="__main__":
         CONSTANT_Pool_Count = getCONSTANT_Pool_count(f,fPointer)
         print "CONSTANT_Pool_Count:",CONSTANT_Pool_Count
 
+        #constant pool
+        pool_count = 1
+        while(i<CONSTANT_Pool_Count):
+                print i
+                i=i+1
+        
         
