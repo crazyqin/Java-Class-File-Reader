@@ -69,10 +69,6 @@ def getVersion(f,begin):
         major_version, = struct.unpack("!H",f[begin+2:begin+4])
         return minor_version,major_version,begin+4
 
-def getCONSTANT_Pool_count(f,begin):
-        CONSTANT_Pool_Count, = struct.unpack("!H",f[begin:begin+2])
-        return CONSTANT_Pool_Count,begin+2
-
 def getAccess_flags(f,begin):
         access_flags, = struct.unpack("!H",f[begin:begin+2])
         flags=""
@@ -102,8 +98,9 @@ def getSuper_class(f,begin):
         super_class,=struct.unpack("!H",f[begin:begin+2])
         return super_class,begin+2        
 
-def getInterfaces_count(f,begin):
-        pass
+def getCount(f,begin):       
+        count, = struct.unpack("!H",f[begin:begin+2])
+        return count,begin+2
 
 def createCONSTANT_info(pool_count,f,begin):
         tag,=struct.unpack("B",f[begin:begin+1])
@@ -179,7 +176,7 @@ if __name__=="__main__":
         minor_version,major_version,fPointer = getVersion(c,fPointer)
         print "minor_version:",minor_version,"major_version:",major_version
 
-        CONSTANT_Pool_Count,fPointer = getCONSTANT_Pool_count(c,fPointer)
+        CONSTANT_Pool_Count,fPointer = getCount(c,fPointer)
         print "CONSTANT_Pool_Count:",CONSTANT_Pool_Count
 
         CONSTANT_info_list=[None]*CONSTANT_Pool_Count
@@ -201,3 +198,21 @@ if __name__=="__main__":
 
         super_class,fPointer=getSuper_class(c,fPointer)
         print "super_class:",super_class
+
+        interfaces_count,fPointer=getCount(c,fPointer)
+        print "interfaces_count:",interfaces_count
+        if interfaces_count!=0:
+                print "Interfaces_count!=0"
+                sys.exit()
+
+        fields_count,fPointer=getCount(c,fPointer)
+        print "fields_count:",fields_count
+        if fields_count!=0:
+                print "fields_count!=0"
+                sys.exit()
+
+        attributes_count,fPointer=getCount(c,fPointer)
+        print "attributes_count:",attributes_count
+        if attributes_count!=0:
+                pass
+
