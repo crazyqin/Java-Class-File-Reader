@@ -58,73 +58,99 @@ class CONSTANT_InvokeDynamic_info():
 
 def checkMagicNumber(f,begin):
         flag=False
-        magic_number, = struct.unpack("!L",c[begin:begin+4])
+        magic_number, = struct.unpack("!L",f[begin:begin+4])
         magic_number=hex(magic_number)[2:-1]
         if magic_number=="cafebabe":
                 flag=True
         return flag,begin+4
 
 def getVersion(f,begin):
-        minor_version, = struct.unpack("!H",c[begin:begin+2])
-        major_version, = struct.unpack("!H",c[begin+2:begin+4])
+        minor_version, = struct.unpack("!H",f[begin:begin+2])
+        major_version, = struct.unpack("!H",f[begin+2:begin+4])
         return minor_version,major_version,begin+4
 
 def getCONSTANT_Pool_count(f,begin):
-        CONSTANT_Pool_Count, = struct.unpack("!H",c[begin:begin+2])
+        CONSTANT_Pool_Count, = struct.unpack("!H",f[begin:begin+2])
         return CONSTANT_Pool_Count,begin+2
 
 def getaccess_flags(f,begin):
-        access_flags, = struct.unpack("!H",c[begin:begin+2])
-        return access_flags,begin+2
+        access_flags, = struct.unpack("!H",f[begin:begin+2])
+        flags=""
+        if access_flags&1==1:
+                flags=flags+",ACC_PUBLIC"
+        if access_flags&16==16:
+                flags=flags+",ACC_FINAL"
+        if access_flags&32==32:
+                flags=flags+",ACC_SUPER"
+        if access_flags&512==512:
+                flags=flags+",ACC_INTERFACE"
+        if access_flags&1024==1024:
+                flags=flags+",ACC_ABSTRACT"
+        if access_flags&4096==4096:
+                flags=flags+",ACC_SYNTHETIC"
+        if access_flags&8192==8192:
+                flags=flags+",ACC_ANNOTATION"
+        if access_flags&16384==16384:
+                flags=flags+",ACC_ENUM"
+        return flags[1:],begin+2
+
+def getthis_class(f,begin):
+        pass
 
 
 def createCONSTANT_info(pool_count,f,begin):
-        tag,=struct.unpack("B",c[begin:begin+1])
-        print tag
+        tag,=struct.unpack("B",f[begin:begin+1])
+        #print tag
         if tag==12:
-                i1,i2=struct.unpack("!HH",c[begin+1:begin+5])
+                i1,i2=struct.unpack("!HH",f[begin+1:begin+5])
                 CONSTANT_info_list[pool_count]=CONSTANT_NameAndType_info(i1,i2)
-                CONSTANT_info_ref[pool_count]=1
+                if CONSTANT_info_ref[pool_count]==None:
+                        CONSTANT_info_ref[pool_count]=1
                 CONSTANT_info_ref[i1]=0
                 CONSTANT_info_ref[i2]=0
                 return tag,begin+5
 
         if tag==10:
-                i1,i2=struct.unpack("!HH",c[begin+1:begin+5])
+                i1,i2=struct.unpack("!HH",f[begin+1:begin+5])
                 CONSTANT_info_list[pool_count]=CONSTANT_Methodref_info(i1,i2)
-                CONSTANT_info_ref[pool_count]=1
+                if CONSTANT_info_ref[pool_count]==None:
+                        CONSTANT_info_ref[pool_count]=1
                 CONSTANT_info_ref[i1]=0
                 CONSTANT_info_ref[i2]=0
                 return tag,begin+5
 
         if tag==9:
-                i1,i2=struct.unpack("!HH",c[begin+1:begin+5])
+                i1,i2=struct.unpack("!HH",f[begin+1:begin+5])
                 CONSTANT_info_list[pool_count]=CONSTANT_Fieldref_info(i1,i2)
-                CONSTANT_info_ref[pool_count]=1
+                if CONSTANT_info_ref[pool_count]==None:
+                        CONSTANT_info_ref[pool_count]=1
                 CONSTANT_info_ref[i1]=0
                 CONSTANT_info_ref[i2]=0
                 return tag,begin+5
 
         if tag==8:
-                i1,=struct.unpack("!H",c[begin+1:begin+3])
+                i1,=struct.unpack("!H",f[begin+1:begin+3])
                 CONSTANT_info_list[pool_count]=CONSTANT_String_info(i1)
-                CONSTANT_info_ref[pool_count]=1
+                if CONSTANT_info_ref[pool_count]==None:
+                        CONSTANT_info_ref[pool_count]=1
                 CONSTANT_info_ref[i1]=0
                 return tag,begin+3
 
         if tag==7:
-                i1,=struct.unpack("!H",c[begin+1:begin+3])
+                i1,=struct.unpack("!H",f[begin+1:begin+3])
                 CONSTANT_info_list[pool_count]=CONSTANT_Class_info(i1)
-                CONSTANT_info_ref[pool_count]=1
+                if CONSTANT_info_ref[pool_count]==None:
+                        CONSTANT_info_ref[pool_count]=1
                 CONSTANT_info_ref[i1]=0
                 return tag,begin+3
 
         if tag==1:
-                length,=struct.unpack("!H",c[begin+1:begin+3])
+                length,=struct.unpack("!H",f[begin+1:begin+3])
                 #get the string from CONSTANT_Utf8_info as string
                 string=""
                 CONSTANT_info_list[pool_count]=CONSTANT_Utf8_info(length,string)
-                CONSTANT_info_ref[pool_count]=1
+                if CONSTANT_info_ref[pool_count]==None:
+                        CONSTANT_info_ref[pool_count]=1
                 return tag,begin+3+length
 
 if __name__=="__main__":
@@ -137,32 +163,28 @@ if __name__=="__main__":
         except Exception, e:
                 print "Unable to open the file."
                 sys.exit()
-        flag,fPointer=checkMagicNumber(f,0)
+        flag,fPointer=checkMagicNumber(c,0)
         if flag==False:
                 print "Not a Java Class File!"
                 sys.exit()
         print "Java Class File detected!(cafebabe)"
 
-        minor_version,major_version,fPointer = getVersion(f,fPointer)
+        minor_version,major_version,fPointer = getVersion(c,fPointer)
         print "minor_version:",minor_version,"major_version:",major_version
 
-        CONSTANT_Pool_Count,fPointer = getCONSTANT_Pool_count(f,fPointer)
+        CONSTANT_Pool_Count,fPointer = getCONSTANT_Pool_count(c,fPointer)
         print "CONSTANT_Pool_Count:",CONSTANT_Pool_Count
 
         CONSTANT_info_list=[None]*CONSTANT_Pool_Count
         CONSTANT_info_ref=[None]*CONSTANT_Pool_Count
 
 
-
         #constant pool
         pool_count = 1
         while(pool_count<CONSTANT_Pool_Count):
-                if CONSTANT_info_ref[pool_count]!=None:
-                        pool_count=pool_count+1
-                        continue
-                tag,fPointer=createCONSTANT_info(pool_count,f,fPointer)
+                tag,fPointer=createCONSTANT_info(pool_count,c,fPointer)
                 pool_count=pool_count+1
         print CONSTANT_info_list,CONSTANT_info_ref
 
-        access_flags,fPointer=getaccess_flags(f,fPointer)
-        print access_flags
+        access_flags,fPointer=getaccess_flags(c,fPointer)
+        print "access_flags:",access_flags
