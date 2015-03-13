@@ -73,6 +73,11 @@ def getCONSTANT_Pool_count(f,begin):
         CONSTANT_Pool_Count, = struct.unpack("!H",c[begin:begin+2])
         return CONSTANT_Pool_Count,begin+2
 
+def getaccess_flags(f,begin):
+        access_flags, = struct.unpack("!H",c[begin:begin+2])
+        return access_flags,begin+2
+
+
 def createCONSTANT_info(pool_count,f,begin):
         tag,=struct.unpack("B",c[begin:begin+1])
         print tag
@@ -158,4 +163,6 @@ if __name__=="__main__":
                 tag,fPointer=createCONSTANT_info(pool_count,f,fPointer)
                 pool_count=pool_count+1
         print CONSTANT_info_list,CONSTANT_info_ref
-        
+
+        access_flags,fPointer=getaccess_flags(f,fPointer)
+        print access_flags
