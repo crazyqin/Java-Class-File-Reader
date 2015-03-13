@@ -73,7 +73,7 @@ def getCONSTANT_Pool_count(f,begin):
         CONSTANT_Pool_Count, = struct.unpack("!H",f[begin:begin+2])
         return CONSTANT_Pool_Count,begin+2
 
-def getaccess_flags(f,begin):
+def getAccess_flags(f,begin):
         access_flags, = struct.unpack("!H",f[begin:begin+2])
         flags=""
         if access_flags&1==1:
@@ -94,9 +94,16 @@ def getaccess_flags(f,begin):
                 flags=flags+",ACC_ENUM"
         return flags[1:],begin+2
 
-def getthis_class(f,begin):
-        pass
+def getThis_class(f,begin):
+        this_class,=struct.unpack("!H",f[begin:begin+2])
+        return this_class,begin+2
 
+def getSuper_class(f,begin):
+        super_class,=struct.unpack("!H",f[begin:begin+2])
+        return super_class,begin+2        
+
+def getInterfaces_count(f,begin):
+        pass
 
 def createCONSTANT_info(pool_count,f,begin):
         tag,=struct.unpack("B",f[begin:begin+1])
@@ -186,5 +193,11 @@ if __name__=="__main__":
                 pool_count=pool_count+1
         print CONSTANT_info_list,CONSTANT_info_ref
 
-        access_flags,fPointer=getaccess_flags(c,fPointer)
+        access_flags,fPointer=getAccess_flags(c,fPointer)
         print "access_flags:",access_flags
+
+        this_class,fPointer=getThis_class(c,fPointer)
+        print "this_class:",this_class
+
+        super_class,fPointer=getSuper_class(c,fPointer)
+        print "super_class:",super_class
